@@ -1,0 +1,29 @@
+// api/obtenerCaballos.js
+import express from "express";
+import fetch from "node-fetch";
+import dotenv from "dotenv";
+dotenv.config();
+
+const router = express.Router();
+
+router.get("/api/obtenerCaballos", async (req, res) => {
+  try {
+    const response = await fetch(
+      `https://api.airtable.com/v0/${process.env.BASE_ID}/${process.env.TABLE_NAME}`,
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.AIRTABLE_TOKEN}`,
+        },
+      }
+    );
+
+    const data = await response.json();
+    const caballos = data.records.map((r) => r.fields);
+    res.json(caballos);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Error al obtener caballos" });
+  }
+});
+
+export default router;

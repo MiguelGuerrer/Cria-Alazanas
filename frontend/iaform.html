@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Agregar Caballo con IA</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <h1>Agregar caballo con IA</h1>
+
+  <textarea id="inputTexto" rows="6" placeholder="Ej: Agregá un caballo llamado Tormenta de 4 años, padre Relámpago, vacunado contra tétanos, sin lesiones, con buen rendimiento."></textarea>
+  <br />
+  <button onclick="procesarTexto()">Enviar a IA</button>
+
+  <p id="estado"></p>
+
+  <script>
+    async function procesarTexto() {
+      const texto = document.getElementById('inputTexto').value;
+      const estado = document.getElementById('estado');
+      estado.innerText = "🧠 Procesando con IA...";
+
+      const prompt = `Convertí esto en un JSON con los campos exactos: Nombre, Edad, Padre, Madre, Lesiones, Vacuna, Rendimiento.\n\nTexto: "${texto}"`;
+
+      try {
+        const openaiRes = await fetch("https://api.openai.com/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer TU_OPENAI_API_KEY" // ← Reemplazalo por tu clave
+          },
+          body: JSON.stringify({
+            model: "gpt-4",
+            messages: [{ role: "user", content: prompt }],
+            temperature: 0.4
+          })
+        });
+
+        const result = await openaiRes.json();
+        const respuestaIA = result.choices[0].message.content;
+
+        let jsonCaballo;
+        try {
+          jsonCaballo = JSON.parse(respuestaIA);
+          const res = await fetch("http://localhost:3000/api/crearCaballo", {
+            method: "POST",
+            headers: {
+             "Content-Type": "application/json",
+             },
+  body: JSON.stringify(jsonCaballo),
+});
+
+const confirmacion = await res.json();
+estado.innerText = "✅ Caballo agregado con ID: " + confirmacion.id;
+
+        } catch (e) {
+          estado.innerText = "❌ La IA no devolvió un JSON válido.";
+          return;
+        }
+
+        // Paso 2: Enviar al backend seguro que vos publiques
+        const res = await fetch("https://TU_BACKEND_URL/api/crearCaballo", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(jsonCaballo)
+        });
+
+        if (res.ok) {
+          estado.innerText = "✅ Caballo cargado correctamente.";
+        } else {
+          estado.innerText = "❌ Error al guardar en Airtable.";
+        }
+      } catch (err) {
+        estado.innerText = "❌ Error al usar la IA.";
+        console.error(err);
+      }
+    }
+  </script>
+</body>
+</html>
