@@ -21,9 +21,10 @@ router.get("/", async (req, res) => {
     const caballos = data.records.map((r) => r.fields);
     res.json(caballos);
   } catch (error) {
-    console.error(error);
+    console.error("Error al obtener caballos:", error);
     res.status(500).json({ error: "Error al obtener caballos" });
   }
+  
 });
 
 export default router;
