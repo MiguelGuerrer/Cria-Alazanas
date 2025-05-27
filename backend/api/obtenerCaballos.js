@@ -6,7 +6,7 @@ dotenv.config();
 
 const router = express.Router();
 
-router.get("/api/obtenerCaballos", async (req, res) => {
+router.get("/", async (req, res) => {
   try {
     const response = await fetch(
       `https://api.airtable.com/v0/${process.env.BASE_ID}/${process.env.TABLE_NAME}`,
