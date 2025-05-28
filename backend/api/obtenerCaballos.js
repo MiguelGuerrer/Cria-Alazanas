@@ -18,7 +18,10 @@ router.get("/", async (req, res) => {
     );
 
     const data = await response.json();
-    const caballos = data.records.map((r) => r.fields);
+    const caballos = data.records
+    .map((r) => r.fields)
+    .filter((c) => c.Nombre);
+
     res.json(caballos);
   } catch (error) {
     console.error("Error al obtener caballos:", error);
